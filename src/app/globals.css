@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap");
+
+:root {
+  --bg: #0a0a0c;
+  --bg-gradient: radial-gradient(ellipse at top, #141418 0%, #0a0a0c 60%);
+  --text: #e8e6e3;
+  --muted: rgba(232, 230, 227, 0.55);
+  --accent: #d4af37;
+  --accent-glow: rgba(212, 175, 55, 0.15);
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-gradient: radial-gradient(ellipse at top, #fff8f0 0%, #ffffff 60%);
+  --text: #1a1a1a;
+  --muted: rgba(26, 26, 26, 0.6);
+  --accent: #d4af37;
+  --accent-glow: rgba(212, 175, 55, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.8s ease, color 0.8s ease;
+}
+
+#__next {
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

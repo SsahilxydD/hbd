@@ -1,0 +1,15 @@
+.waveform {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  height: 36px;
+  align-items: flex-end;
+  margin: 18px 0;
+}
+
+.bar {
+  width: 4px;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: height 0.15s ease;
+}

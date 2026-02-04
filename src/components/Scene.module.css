@@ -1,0 +1,14 @@
+.scene {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 1;
+}
+
+.content {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+}

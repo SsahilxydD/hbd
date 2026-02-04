@@ -1,0 +1,9 @@
+.footer {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: rgba(232, 230, 227, 0.25);
+  z-index: 5;
+}
