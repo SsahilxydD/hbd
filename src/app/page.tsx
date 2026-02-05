@@ -15,6 +15,45 @@ import {
 } from "@/components";
 import { copy } from "@/data/copy";
 
+type YouTubePlayer = {
+  playVideo: () => void;
+  stopVideo: () => void;
+  destroy: () => void;
+  setVolume: (volume: number) => void;
+  unMute: () => void;
+};
+
+type YouTubePlayerEvent = {
+  target: YouTubePlayer;
+  data: number;
+};
+
+type YouTubePlayerOptions = {
+  videoId: string;
+  playerVars?: Record<string, number | string>;
+  events?: {
+    onReady?: (event: YouTubePlayerEvent) => void;
+    onStateChange?: (event: YouTubePlayerEvent) => void;
+  };
+};
+
+type YouTubeAPI = {
+  Player: new (element: HTMLElement | string, options: YouTubePlayerOptions) => YouTubePlayer;
+  PlayerState?: {
+    PLAYING: number;
+  };
+};
+
+declare global {
+  interface Window {
+    YT?: YouTubeAPI;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+const YOUTUBE_VIDEO_ID = "UK39LkwRmYk";
+const YOUTUBE_API_SCRIPT_ID = "youtube-iframe-api";
+
 type SceneName =
   | "hook"
   | "identity"
@@ -41,6 +80,35 @@ export default function Home() {
 
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+  const messagePlayerRef = useRef<YouTubePlayer | null>(null);
+  const messagePlayerContainerRef = useRef<HTMLDivElement | null>(null);
+  const youtubeApiReadyRef = useRef<Promise<void> | null>(null);
+
+  const loadYouTubeApi = useCallback(() => {
+    if (typeof window === "undefined") return Promise.resolve();
+    if (window.YT?.Player) return Promise.resolve();
+    if (youtubeApiReadyRef.current) return youtubeApiReadyRef.current;
+
+    youtubeApiReadyRef.current = new Promise((resolve) => {
+      const existing = document.getElementById(YOUTUBE_API_SCRIPT_ID);
+      if (existing) {
+        const previous = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+          previous?.();
+          resolve();
+        };
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = YOUTUBE_API_SCRIPT_ID;
+      script.src = "https://www.youtube.com/iframe_api";
+      window.onYouTubeIframeAPIReady = () => resolve();
+      document.body.appendChild(script);
+    });
+
+    return youtubeApiReadyRef.current;
+  }, []);
 
   useEffect(() => {
     bgMusicRef.current = new Audio("/music.mp3");
@@ -122,6 +190,58 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [currentScene]);
+
+  useEffect(() => {
+    if (currentScene !== "message") {
+      if (messagePlayerRef.current) {
+        messagePlayerRef.current.stopVideo();
+        messagePlayerRef.current.destroy();
+        messagePlayerRef.current = null;
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    loadYouTubeApi().then(() => {
+      if (cancelled) return;
+      if (!messagePlayerContainerRef.current || !window.YT?.Player) return;
+
+      messagePlayerRef.current?.destroy();
+      messagePlayerRef.current = new window.YT.Player(messagePlayerContainerRef.current, {
+        videoId: YOUTUBE_VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          fs: 0,
+          disablekb: 1,
+          iv_load_policy: 3,
+          origin: window.location.origin,
+        },
+        events: {
+          onReady: (event) => {
+            event.target.setVolume(100);
+            event.target.unMute();
+            event.target.playVideo();
+          },
+          onStateChange: (event) => {
+            const playingState = window.YT?.PlayerState?.PLAYING ?? 1;
+            if (event.data === playingState) {
+              event.target.setVolume(100);
+              event.target.unMute();
+            }
+          },
+        },
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentScene, loadYouTubeApi]);
 
   const handleMemoryReveal = useCallback((count: number) => {
     setMemoriesRevealed(count);
@@ -240,13 +360,9 @@ export default function Home() {
           overflow: "hidden",
           boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
         }}>
-          <iframe
-            src="https://www.youtube.com/embed/UK39LkwRmYk?autoplay=1&controls=0&playsinline=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&fs=0&disablekb=1"
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allow="autoplay; encrypted-media"
-            style={{ border: "none" }}
+          <div
+            ref={messagePlayerContainerRef}
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
         <div style={{ marginTop: 14 }}>
