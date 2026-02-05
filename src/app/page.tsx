@@ -241,12 +241,11 @@ export default function Home() {
           boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
         }}>
           <iframe
-            src="https://streamable.com/e/o34fdv?autoplay=1&muted=0"
+            src="https://www.youtube.com/embed/UK39LkwRmYk?autoplay=1&controls=1&playsinline=1"
             width="100%"
             height="100%"
             frameBorder="0"
-            allow="autoplay; fullscreen"
-            allowFullScreen
+            allow="autoplay; encrypted-media"
             style={{ border: "none" }}
           />
         </div>
