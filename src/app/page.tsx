@@ -241,7 +241,7 @@ export default function Home() {
           boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
         }}>
           <iframe
-            src="https://www.youtube.com/embed/UK39LkwRmYk?autoplay=1&controls=1&playsinline=1"
+            src="https://www.youtube.com/embed/UK39LkwRmYk?autoplay=1&controls=0&playsinline=1&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&fs=0&disablekb=1"
             width="100%"
             height="100%"
             frameBorder="0"
