@@ -21,6 +21,8 @@ type YouTubePlayer = {
   destroy: () => void;
   setVolume: (volume: number) => void;
   unMute: () => void;
+  setPlaybackQuality?: (quality: string) => void;
+  setPlaybackQualityRange?: (min: string, max: string) => void;
 };
 
 type YouTubePlayerEvent = {
@@ -108,6 +110,28 @@ export default function Home() {
     });
 
     return youtubeApiReadyRef.current;
+  }, []);
+
+  const enforcePlayerSettings = useCallback((player: YouTubePlayer) => {
+    player.setVolume(100);
+    player.unMute();
+    player.setPlaybackQuality?.("highres");
+    player.setPlaybackQualityRange?.("highres", "highres");
+  }, []);
+
+  const styleMessageIframe = useCallback(() => {
+    const container = messagePlayerContainerRef.current;
+    if (!container) return;
+    const iframe = container.querySelector("iframe");
+    if (!iframe) return;
+
+    iframe.style.width = "112%";
+    iframe.style.height = "112%";
+    iframe.style.position = "absolute";
+    iframe.style.top = "-6%";
+    iframe.style.left = "-6%";
+    iframe.style.border = "0";
+    iframe.style.display = "block";
   }, []);
 
   useEffect(() => {
@@ -219,19 +243,21 @@ export default function Home() {
           fs: 0,
           disablekb: 1,
           iv_load_policy: 3,
+          showinfo: 0,
+          vq: "highres",
           origin: window.location.origin,
         },
         events: {
           onReady: (event) => {
-            event.target.setVolume(100);
-            event.target.unMute();
+            styleMessageIframe();
+            enforcePlayerSettings(event.target);
             event.target.playVideo();
           },
           onStateChange: (event) => {
             const playingState = window.YT?.PlayerState?.PLAYING ?? 1;
             if (event.data === playingState) {
-              event.target.setVolume(100);
-              event.target.unMute();
+              styleMessageIframe();
+              enforcePlayerSettings(event.target);
             }
           },
         },
@@ -241,7 +267,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [currentScene, loadYouTubeApi]);
+  }, [currentScene, enforcePlayerSettings, loadYouTubeApi, styleMessageIframe]);
 
   const handleMemoryReveal = useCallback((count: number) => {
     setMemoriesRevealed(count);
@@ -358,11 +384,13 @@ export default function Home() {
           aspectRatio: "9/16",
           borderRadius: 16,
           overflow: "hidden",
+          position: "relative",
+          background: "black",
           boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
         }}>
           <div
             ref={messagePlayerContainerRef}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%", height: "100%", position: "relative" }}
           />
         </div>
         <div style={{ marginTop: 14 }}>
